@@ -39,7 +39,7 @@ module Fog
           :ipaddress => 'guest.ipAddress',
           :power_state => 'runtime.powerState',
           :connection_state => 'runtime.connectionState',
-          :host => 'runtime.host',
+          :hypervisor => 'runtime.host',
           :tools_state => 'guest.toolsStatus',
           :tools_version => 'guest.toolsVersionStatus',
           :is_a_template => 'config.template',
@@ -52,12 +52,26 @@ module Fog
         def convert_vm_mob_ref_to_attr_hash(vm_mob_ref)
           return nil unless vm_mob_ref
 
+          # The magic going on here is converting the values to an array and the array
+          # into an argument vector to collect.  This is akin to
+          # vm_mob_ref.collect!("name", "config.instanceUuid", ...)
           props = vm_mob_ref.collect! *ATTR_TO_PROP.values.uniq
+          # NOTE: Object.tap is in 1.8.7 and later.
+          # REVISIT: This needs to be less magical.  =)
+          # JJM: I'm confused why the 'hypervisor' attribute isn't being returned as a simple string.
+          # the model of a server will be initialized from this 'simple' has if you look in
+          # lib/fog/vsphere/models/compute/servers.rb ...
           Hash[ATTR_TO_PROP.map { |k,v| [k.to_s, props[v]] }].tap do |attrs|
             attrs['id'] ||= vm_mob_ref._ref
             attrs['mo_ref'] = vm_mob_ref._ref
-            attrs['hypervisor'] = attrs['host'].name
-            attrs['mac_addresses'] = vm_mob_ref.macs
+            # Get the hypervisor name, not the entire Host object
+            if attrs['hypervisor'].kind_of?(RbVmomi::VIM::HostSystem) then
+              # If it's not ready, set the hypervisor to nil
+              attrs['hypervisor'] = attrs['hypervisor'].name rescue nil
+            end
+            # This inline rescue catches any standard error.  While a VM is
+            # cloning, a call to the macs method will throw and NoMethodError
+            attrs['mac_addresses'] = vm_mob_ref.macs rescue nil
             attrs['path'] = get_folder_path(vm_mob_ref.parent)
           end
         end
