@@ -20,8 +20,6 @@ module Fog
         attribute :name
         # UUID may be the same from VM to VM if the user does not select (I copied it)
         attribute :uuid
-        # Instance UUID should be unique across a vCenter deployment.
-        attribute :instance_uuid
         attribute :hostname
         attribute :operatingsystem
         attribute :ipaddress
@@ -36,6 +34,13 @@ module Fog
         attribute :path
         attribute :memory_mb
         attribute :cpus
+
+        # attribute alias
+        def instance_uuid; id end  # Instance UUID should be unique across a vCenter deployment.
+        def state; power_state end
+        def dns_name; hostname end
+        def public_ip_address; ipaddress end
+        def private_ip_address; ipaddress end
 
         def vm_reconfig_memory(options = {})
           requires :instance_uuid, :memory
@@ -110,6 +115,17 @@ module Fog
           new_vm.connection = self.connection
           # Return the new VM model.
           new_vm
+        end
+
+        # save an existing VM or a new VM
+        def save()
+          if id
+            raise 'Saving an existing VM in vSphere has not been implemented yet!' # TODO: save updated attributes
+          else
+            new_vm = clone(self.attributes)
+            merge_attributes(new_vm.attributes)
+            return self
+          end
         end
 
         # ready to be connected?
