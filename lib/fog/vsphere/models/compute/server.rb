@@ -112,8 +112,9 @@ module Fog
           new_vm
         end
 
+        # ready to be connected?
         def ready?
-          power_state == "poweredOn"
+          !! ipaddress
         end
 
         def tools_installed?
@@ -135,9 +136,7 @@ module Fog
         def memory
           memory_mb * 1024 * 1024
         end
-
       end
-
     end
   end
 end
