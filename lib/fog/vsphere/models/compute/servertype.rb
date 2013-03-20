@@ -8,8 +8,8 @@ module Fog
 
         attribute :family
         attribute :fullname
-#        attribute :interfacetypes
         attribute :datacenter
+        attribute :interfacetypes
 
         def initialize(attributes={} )
           super defaults.merge(attributes)
@@ -20,7 +20,7 @@ module Fog
         end
 
         def interfacetypes filters={}
-          service.interfacetypes({ :datacenter => datacenter, :servertype => self }.merge(filters))
+          attributes[:interfacetypes] ||= service.interfacetypes({ :datacenter => datacenter, :servertype => self }.merge(filters))
         end
 
         private
@@ -29,6 +29,7 @@ module Fog
           {
             :id=>"otherGuest64",
             :family=>"otherGuestFamily",
+            :interfacetypes => nil,
           }
         end
       end
