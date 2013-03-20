@@ -8,7 +8,7 @@ module Fog
       class Servertypes < Fog::Collection
 
         model Fog::Compute::Vsphere::Servertype
-        attr_accessor :datacenter
+        attr_accessor :datacenter, :id, :fullname
 
         def all(filters = { })
           load service.list_server_types(filters.merge({:datacenter => datacenter}))
