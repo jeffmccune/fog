@@ -97,7 +97,7 @@ module Fog
           :memory_mb => 'config.hardware.memoryMB',
           :cpus   => 'config.hardware.numCPU',
           :overall_status => 'overallStatus',
-          :guest_id => 'summary.guest.guestId',
+          :guest_id => 'config.guestId',
         }
 
         def convert_vm_view_to_attr_hash(vms)
